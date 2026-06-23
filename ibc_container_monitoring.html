@@ -40,9 +40,9 @@
 <body>
   <div class="container">
     <div class="header">
-      <h1>IBC Container Monitoring</h1>
-      <p>Container ID: IBC-2024-7451 | Material: HDPE | Cargo: Chemical Concentrate</p>
-      <div class="status-badge status-good">✓ Operational</div>
+      <h1>IBC Monitoring</h1>
+      <p>Container uuID: 550e8400-e29b-41d4-a716-446655440000 | Material: HDPE | Type: 31HA1 </p>
+      <div class="status-badge status-good">✓ In Use</div>
     </div>
 
     <div class="metrics-grid">
@@ -63,32 +63,21 @@
       </div>
       <div class="metric-card">
         <div class="metric-label">Vibration</div>
-        <div class="metric-value">0.8<span class="metric-unit">m/s²</span></div>
-        <div class="metric-status status-warning-small">⚠ Moderate</div>
-      </div>
-      <div class="metric-card">
-        <div class="metric-label">Days in Transit</div>
-        <div class="metric-value">18<span class="metric-unit">days</span></div>
-        <div class="metric-status status-good-small">✓ Tracking</div>
-      </div>
-      <div class="metric-card">
-        <div class="metric-label">Storage Cycles</div>
-        <div class="metric-value">3<span class="metric-unit">cycles</span></div>
-        <div class="metric-status status-good-small">✓ Monitored</div>
-      </div>
+        <div class="metric-value">0<span class="metric-unit">m/s²</span></div>
+        <div class="metric-status status-warning-small"> None </div>
     </div>
 
     <div class="degradation-section">
       <div class="degradation-title">Material Degradation Index</div>
       <div class="degradation-bar">
-        <div class="degradation-fill" style="width: 32%;"></div>
+        <div class="degradation-fill" style="width: 85%;"></div>
       </div>
-      <div style="font-size: 13px; color: var(--color-text-secondary); margin-bottom: 1rem;">32% of estimated lifespan consumed</div>
+      <div style="font-size: 13px; color: var(--color-text-secondary); margin-bottom: 1rem;"> Index indicates 85% probability of continued usability </div>
       
       <div class="degradation-info">
         <div class="degradation-stat">
           <div class="degradation-stat-label">Thermal Stress</div>
-          <div class="degradation-stat-value">18%</div>
+          <div class="degradation-stat-value">3%</div>
         </div>
         <div class="degradation-stat">
           <div class="degradation-stat-label">UV Damage</div>
@@ -100,18 +89,17 @@
         </div>
         <div class="degradation-stat">
           <div class="degradation-stat-label">Mechanical Wear</div>
-          <div class="degradation-stat-value">2%</div>
+          <div class="degradation-stat-value">1%</div>
         </div>
       </div>
 
       <div class="warning-box">
-        <strong>⚠ Note:</strong> Container remains suitable for current cargo. Recommend inspection before next cycle due to elevated thermal exposure.
-      </div>
+        <strong>⚠ Note:</strong> Container remains suitable for current filling good
     </div>
 
     <div class="charts-grid">
       <div class="chart-section">
-        <div class="chart-title">Temperature Trend (last 7 days)</div>
+        <div class="chart-title">Temperature Trend (last month)</div>
         <div class="chart-wrapper">
           <canvas id="tempChart" role="img" aria-label="Line chart showing temperature values from 18 to 28 degrees over 7 days">Temperature trend: Day1 20°C, Day2 22°C, Day3 24°C, Day4 23°C, Day5 25°C, Day6 26°C, Day7 23°C</canvas>
         </div>
@@ -124,23 +112,6 @@
         </div>
       </div>
     </div>
-
-    <div class="charts-grid">
-      <div class="chart-section">
-        <div class="chart-title">Degradation Contributors</div>
-        <div class="chart-wrapper">
-          <canvas id="degradationChart" role="img" aria-label="Pie chart showing degradation factors: Thermal 56%, UV 25%, Chemical 12%, Mechanical 7%">Degradation breakdown: Thermal stress 56%, UV exposure 25%, Chemical interaction 12%, Mechanical wear 7%</canvas>
-        </div>
-      </div>
-
-      <div class="chart-section">
-        <div class="chart-title">Estimated Remaining Lifespan</div>
-        <div class="chart-wrapper">
-          <canvas id="lifespanChart" role="img" aria-label="Horizontal bar chart showing remaining lifespan at 68 months out of 100 month total lifespan">Remaining lifespan: 68 months out of 100 month total capacity</canvas>
-        </div>
-      </div>
-    </div>
-  </div>
 
   <script>
     const isDark = matchMedia('(prefers-color-scheme: dark)').matches;
