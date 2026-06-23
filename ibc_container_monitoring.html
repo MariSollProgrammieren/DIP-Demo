@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>IBC Container Monitoring</title>
+  <title>IBC Monitoring</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
   <style>
     :root {
@@ -236,8 +236,8 @@
 <body>
   <div class="container">
     <div class="header">
-      <h1>IBC Container Monitoring</h1>
-      <p>Container ID: IBC-2024-7451 | Material: HDPE | Cargo: Chemical Concentrate</p>
+      <h1>IBC Monitoring</h1>
+      <p>Container ID: 550e8400-e29b-41d4-a716-446655440000 | Material: HDPE | Type: 31HA1</p>
       <div class="status-badge status-good">✓ Operational</div>
     </div>
 
@@ -259,49 +259,20 @@
       </div>
       <div class="metric-card">
         <div class="metric-label">Vibration</div>
-        <div class="metric-value">0.8<span class="metric-unit">m/s²</span></div>
-        <div class="metric-status status-warning-small">⚠ Moderate</div>
-      </div>
-      <div class="metric-card">
-        <div class="metric-label">Days in Transit</div>
-        <div class="metric-value">18<span class="metric-unit">days</span></div>
-        <div class="metric-status status-good-small">✓ Tracking</div>
-      </div>
-      <div class="metric-card">
-        <div class="metric-label">Storage Cycles</div>
-        <div class="metric-value">3<span class="metric-unit">cycles</span></div>
-        <div class="metric-status status-good-small">✓ Monitored</div>
+        <div class="metric-value">0<span class="metric-unit">m/s²</span></div>
+        <div class="metric-status status-good-small">None</div>
       </div>
     </div>
 
     <div class="degradation-section">
       <div class="degradation-title">Material Degradation Index</div>
       <div class="degradation-bar">
-        <div class="degradation-fill" style="width: 32%;"></div>
+        <div class="degradation-fill" style="width: 89%;"></div>
       </div>
-      <div style="font-size: 13px; color: var(--color-text-secondary); margin-bottom: 1rem;">32% of estimated lifespan consumed</div>
-      
-      <div class="degradation-info">
-        <div class="degradation-stat">
-          <div class="degradation-stat-label">Thermal Stress</div>
-          <div class="degradation-stat-value">18%</div>
-        </div>
-        <div class="degradation-stat">
-          <div class="degradation-stat-label">UV Damage</div>
-          <div class="degradation-stat-value">8%</div>
-        </div>
-        <div class="degradation-stat">
-          <div class="degradation-stat-label">Chemical Interaction</div>
-          <div class="degradation-stat-value">4%</div>
-        </div>
-        <div class="degradation-stat">
-          <div class="degradation-stat-label">Mechanical Wear</div>
-          <div class="degradation-stat-value">2%</div>
-        </div>
-      </div>
+      <div style="font-size: 13px; color: var(--color-text-secondary); margin-bottom: 1rem;">Index indicates 89% probability of continued usability</div>
 
       <div class="warning-box">
-        <strong>⚠ Note:</strong> Container remains suitable for current cargo. Recommend inspection before next cycle due to elevated thermal exposure.
+        <strong>⚠ Note:</strong> Container remains suitable for filling good.
       </div>
     </div>
 
@@ -317,22 +288,6 @@
         <div class="chart-title">Humidity Levels (last 7 days)</div>
         <div class="chart-wrapper">
           <canvas id="humidityChart" role="img" aria-label="Line chart showing humidity values from 35 to 65 percent over 7 days"></canvas>
-        </div>
-      </div>
-    </div>
-
-    <div class="charts-grid">
-      <div class="chart-section">
-        <div class="chart-title">Degradation Contributors</div>
-        <div class="chart-wrapper">
-          <canvas id="degradationChart" role="img" aria-label="Pie chart showing degradation factors: Thermal 56%, UV 25%, Chemical 12%, Mechanical 7%"></canvas>
-        </div>
-      </div>
-
-      <div class="chart-section">
-        <div class="chart-title">Estimated Remaining Lifespan</div>
-        <div class="chart-wrapper">
-          <canvas id="lifespanChart" role="img" aria-label="Horizontal bar chart showing remaining lifespan at 68 months out of 100 month total lifespan"></canvas>
         </div>
       </div>
     </div>
@@ -420,85 +375,6 @@
             max: 70 
           } 
         } 
-      }
-    });
-
-    // Degradation Chart
-    new Chart(document.getElementById('degradationChart'), {
-      type: 'doughnut',
-      data: {
-        labels: ['Thermal Stress', 'UV Exposure', 'Chemical', 'Mechanical'],
-        datasets: [{
-          data: [56, 25, 12, 7],
-          backgroundColor: [primaryColor, secondaryColor, '#FF6B6B', '#9966CC'],
-          borderColor: isDark ? '#1a1a1a' : '#fff',
-          borderWidth: 2
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: { 
-          legend: { 
-            display: true, 
-            position: 'bottom', 
-            labels: { 
-              color: textColor, 
-              padding: 15, 
-              font: { size: 12 } 
-            } 
-          } 
-        }
-      }
-    });
-
-    // Lifespan Chart
-    new Chart(document.getElementById('lifespanChart'), {
-      type: 'bar',
-      data: {
-        labels: ['Lifespan'],
-        datasets: [
-          { 
-            label: 'Used', 
-            data: [32], 
-            backgroundColor: tertiaryColor, 
-            borderRadius: 4 
-          },
-          { 
-            label: 'Remaining', 
-            data: [68], 
-            backgroundColor: primaryColor, 
-            borderRadius: 4 
-          }
-        ]
-      },
-      options: {
-        indexAxis: 'y',
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: { 
-          legend: { 
-            display: true, 
-            position: 'bottom', 
-            labels: { 
-              color: textColor, 
-              padding: 10, 
-              font: { size: 12 } 
-            } 
-          } 
-        },
-        scales: {
-          x: { 
-            stacked: true, 
-            grid: { color: gridColor }, 
-            ticks: { color: textColor } 
-          },
-          y: { 
-            stacked: true, 
-            grid: { drawBorder: false }, 
-            ticks: { color: textColor } 
-          }
-        }
       }
     });
   </script>
