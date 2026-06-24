@@ -1,638 +1,523 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>IBC Monitoring</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
-  <style>
-    :root {
-      --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      --color-background-primary: #ffffff;
-      --color-background-secondary: #f6f8fa;
-      --color-text-primary: #24292f;
-      --color-text-secondary: #57606a;
-      --color-text-success: #1a7f37;
-      --color-text-warning: #9e6a03;
-      --color-text-danger: #da3633;
-      --color-border-tertiary: #d0d7de;
-    }
-    
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --color-background-primary: #0d1117;
-        --color-background-secondary: #161b22;
-        --color-text-primary: #c9d1d9;
-        --color-text-secondary: #8b949e;
-        --color-text-success: #3fb950;
-        --color-text-warning: #d29922;
-        --color-text-danger: #f85149;
-        --color-border-tertiary: #30363d;
-      }
-    }
-
-    * { 
-      box-sizing: border-box; 
-      margin: 0; 
-      padding: 0; 
-    }
-
-    body { 
-      font-family: var(--font-sans, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif); 
-      background: var(--color-background-primary); 
-      color: var(--color-text-primary); 
-      line-height: 1.6;
-    }
-
-    .container { 
-      max-width: 100%; 
-      padding: 2rem 1.5rem; 
-    }
-
-    .header { 
-      margin-bottom: 2rem; 
-    }
-
-    .header h1 { 
-      font-size: 28px; 
-      font-weight: 600; 
-      margin-bottom: 0.5rem; 
-    }
-
-    .header p { 
-      font-size: 14px; 
-      color: var(--color-text-secondary); 
-      margin-bottom: 0.5rem;
-    }
-
-    .status-badge { 
-      display: inline-block; 
-      padding: 6px 12px; 
-      border-radius: 20px; 
-      font-size: 13px; 
-      font-weight: 500; 
-      margin-top: 0.5rem; 
-      margin-right: 1rem;
-    }
-
-    .status-good { 
-      background: rgba(100, 200, 100, 0.15); 
-      color: var(--color-text-success); 
-    }
-
-    .status-warning { 
-      background: rgba(255, 180, 0, 0.15); 
-      color: var(--color-text-warning); 
-    }
-
-    .status-critical { 
-      background: rgba(255, 100, 100, 0.15); 
-      color: var(--color-text-danger); 
-    }
-
-    .cycles-container {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-      gap: 12px;
-      margin-top: 1rem;
-    }
-
-    .cycle-card {
-      background: var(--color-background-secondary);
-      padding: 0.75rem;
-      border-radius: 8px;
-      border: 0.5px solid var(--color-border-tertiary);
-      text-align: center;
-    }
-
-    .cycle-label {
-      font-size: 11px;
-      color: var(--color-text-secondary);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: 0.5rem;
-    }
-
-    .cycle-value {
-      font-size: 24px;
-      font-weight: 600;
-      color: var(--color-text-primary);
-    }
-
-    .section-title {
-      font-size: 16px;
-      font-weight: 600;
-      color: var(--color-text-primary);
-      margin-top: 2rem;
-      margin-bottom: 1rem;
-    }
-
-    .metrics-grid { 
-      display: grid; 
-      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); 
-      gap: 12px; 
-      margin-bottom: 2rem; 
-    }
-
-    .metric-card { 
-      background: var(--color-background-secondary); 
-      padding: 1rem; 
-      border-radius: 12px; 
-      border: 0.5px solid var(--color-border-tertiary); 
-    }
-
-    .metric-label { 
-      font-size: 12px; 
-      color: var(--color-text-secondary); 
-      text-transform: uppercase; 
-      letter-spacing: 0.5px; 
-      margin-bottom: 0.5rem; 
-    }
-
-    .metric-value { 
-      font-size: 20px; 
-      font-weight: 500; 
-    }
-
-    .metric-unit { 
-      font-size: 12px; 
-      color: var(--color-text-secondary); 
-      margin-left: 4px; 
-    }
-
-    .metric-status { 
-      font-size: 11px; 
-      margin-top: 8px; 
-      padding: 4px 0; 
-    }
-
-    .status-good-small { 
-      color: var(--color-text-success); 
-    }
-
-    .status-warning-small { 
-      color: var(--color-text-warning); 
-    }
-
-    .status-critical-small { 
-      color: var(--color-text-danger); 
-    }
-
-    .charts-grid { 
-      display: grid; 
-      grid-template-columns: 1fr; 
-      gap: 2rem; 
-      margin-bottom: 2rem; 
-    }
-
-    .chart-section { 
-      background: var(--color-background-primary); 
-      border: 0.5px solid var(--color-border-tertiary); 
-      border-radius: 12px; 
-      padding: 1.5rem; 
-    }
-
-    .chart-title { 
-      font-size: 14px; 
-      font-weight: 500; 
-      margin-bottom: 1rem; 
-      color: var(--color-text-primary); 
-    }
-
-    .chart-wrapper { 
-      position: relative; 
-      height: 350px; 
-    }
-
-    .degradation-section { 
-      background: linear-gradient(135deg, rgba(100, 100, 150, 0.08), rgba(150, 100, 200, 0.08)); 
-      border: 0.5px solid var(--color-border-tertiary); 
-      border-radius: 12px; 
-      padding: 1.5rem; 
-      margin-bottom: 2rem;
-    }
-
-    .degradation-title { 
-      font-size: 16px; 
-      font-weight: 500; 
-      margin-bottom: 1rem; 
-    }
-
-    .degradation-bar { 
-      height: 12px; 
-      background: var(--color-background-secondary); 
-      border-radius: 6px; 
-      overflow: hidden; 
-      margin-bottom: 0.5rem; 
-    }
-
-    .degradation-fill { 
-      height: 100%; 
-      background: linear-gradient(90deg, #64c864, #ffc800, #ff6464); 
-      border-radius: 6px; 
-      transition: width 0.3s ease; 
-    }
-
-    .degradation-info { 
-      display: flex; 
-      gap: 2rem; 
-      margin-top: 1.5rem;
-      flex-wrap: wrap;
-    }
-
-    .degradation-stat { 
-      flex: 1;
-      min-width: 120px;
-    }
-
-    .degradation-stat-label { 
-      font-size: 12px; 
-      color: var(--color-text-secondary); 
-      text-transform: uppercase; 
-      margin-bottom: 4px; 
-    }
-
-    .degradation-stat-value { 
-      font-size: 18px; 
-      font-weight: 500; 
-    }
-
-    .warning-box { 
-      background: rgba(255, 180, 0, 0.08); 
-      border-left: 3px solid var(--color-text-warning); 
-      padding: 1rem; 
-      border-radius: 4px; 
-      margin-top: 1rem; 
-      font-size: 13px; 
-    }
-
-    .warning-box strong { 
-      color: var(--color-text-warning); 
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Carbonyl-Index Entwicklung – HDPE K-IBC</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-annotation/3.0.1/chartjs-plugin-annotation.min.js"></script>
+<style>
+  body {
+    font-family: system-ui, -apple-system, sans-serif;
+    background: #fff;
+    color: #1A2233;
+    margin: 0;
+    padding: 2rem;
+    max-width: 860px;
+  }
+  h1 {
+    font-size: 16px;
+    font-weight: 500;
+    margin: 0 0 4px;
+    color: #1A2233;
+  }
+  h2 {
+    font-size: 16px;
+    font-weight: 500;
+    margin: 3rem 0 4px;
+    color: #1A2233;
+    border-top: 1px solid #E2E6ED;
+    padding-top: 2rem;
+  }
+  .subtitle {
+    font-size: 12px;
+    color: #8A97AA;
+    margin: 0 0 20px;
+  }
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 12px;
+    font-size: 12px;
+    color: #4A5568;
+    align-items: center;
+  }
+  .legend span {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .swatch {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    display: inline-block;
+  }
+  .line-solid {
+    width: 28px;
+    height: 3px;
+    background: #378ADD;
+    border-radius: 2px;
+    display: inline-block;
+  }
+  .line-dashed {
+    width: 28px;
+    height: 0;
+    border-top: 2.5px dashed #378ADD;
+    display: inline-block;
+  }
+  .axis-label-y {
+    font-size: 10px;
+    color: #8A97AA;
+    margin-bottom: 2px;
+    padding-left: 48px;
+  }
+  .axis-label-x {
+    font-size: 10px;
+    color: #8A97AA;
+    margin-top: 4px;
+    text-align: center;
+  }
+  .chart-wrap {
+    position: relative;
+    width: 100%;
+    height: 380px;
+  }
+  .footnote {
+    font-size: 11px;
+    color: #8A97AA;
+    margin-top: 14px;
+    line-height: 1.6;
+    border-top: 0.5px solid #E2E6ED;
+    padding-top: 10px;
+  }
+  .footnote strong {
+    font-weight: 500;
+  }
+</style>
 </head>
 <body>
-  <div class="container">
-    <div class="header">
-      <h1>IBC Monitoring</h1>
-      <p>Container ID: 550e8400-e29b-41d4-a716-446655440000 | Material: HDPE | Type: 31HA1 | Production date: 24.06.2024</p>
-      <div style="display: flex; align-items: center; flex-wrap: wrap;">
-        <div class="status-badge status-good">✓ In Use</div>
-        <div class="cycles-container" style="margin-top: 0; flex: 1; min-width: 300px;">
-          <div class="cycle-card">
-            <div class="cycle-label">Repair Cycles</div>
-            <div class="cycle-value">0</div>
-          </div>
-          <div class="cycle-card">
-            <div class="cycle-label">Washing Cycles</div>
-            <div class="cycle-value">3</div>
-          </div>
-          <div class="cycle-card">
-            <div class="cycle-label">Filling Cycles</div>
-            <div class="cycle-value">4</div>
-          </div>
-          <div class="cycle-card">
-            <div class="cycle-label">Different Filling goods</div>
-            <div class="cycle-value">1</div>
-          </div>
-        </div>
-      </div>
-    </div>
 
-    <div class="degradation-section">
-      <div class="degradation-title">Material Degradation Index</div>
-      <div class="degradation-bar">
-        <div class="degradation-fill" style="width: 89%;"></div>
-      </div>
-      <div style="font-size: 13px; color: var(--color-text-secondary); margin-bottom: 1rem;">Index indicates 89% probability of continued usability</div>
+<h1>Carbonyl-Index – Entwicklung über die Nutzungsphase</h1>
+<p class="subtitle">HDPE-Innenbehälter K-IBC · Beispieldaten · FF1 smartIBC</p>
 
-      <div class="warning-box">
-        <strong>⚠ Note:</strong> Container remains suitable for filling dangerous goods.
-      </div>
-    </div>
+<div class="legend">
+  <span><span class="line-solid"></span>Messwerte (0–2 Jahre)</span>
+  <span><span class="line-dashed"></span>Prognose (ab Jahr 2)</span>
+  <span><span class="swatch" style="background:#EAF3DE;border:1px solid #97C459;"></span>Unkritisch</span>
+  <span><span class="swatch" style="background:#FAEEDA;border:1px solid #EF9F27;"></span>Übergangsbereich</span>
+  <span><span class="swatch" style="background:#FCEBEB;border:1px solid #E24B4A;"></span>Kritisch</span>
+</div>
 
-    <div class="section-title">Current Statistics</div>
-    <div class="metrics-grid">
-      <div class="metric-card">
-        <div class="metric-label">Temperature</div>
-        <div class="metric-value">23<span class="metric-unit">°C</span></div>
-        <div class="metric-status status-good-small">✓ Normal</div>
-      </div>
-      <div class="metric-card">
-        <div class="metric-label">Humidity</div>
-        <div class="metric-value">45<span class="metric-unit">%</span></div>
-        <div class="metric-status status-good-small">✓ Optimal</div>
-      </div>
-      <div class="metric-card">
-        <div class="metric-label">UV Exposure</div>
-        <div class="metric-value">2.3<span class="metric-unit">MJ/m²</span></div>
-        <div class="metric-status status-good-small">✓ Low</div>
-      </div>
-      <div class="metric-card">
-        <div class="metric-label">Vibration</div>
-        <div class="metric-value">0<span class="metric-unit">m/s²</span></div>
-        <div class="metric-status status-good-small">None</div>
-      </div>
-    </div>
+<div class="axis-label-y">CI [-]</div>
 
-    <div class="section-title">Detailed Insight</div>
-    <div class="charts-grid">
-      <div class="chart-section">
-        <div class="chart-title">Temperature Trend (last 30 days)</div>
-        <div class="chart-wrapper">
-          <canvas id="tempChart" role="img" aria-label="Line chart showing temperature trend over 30 days"></canvas>
-        </div>
-      </div>
+<div class="chart-wrap">
+  <canvas id="ciChart" role="img" aria-label="Liniendiagramm: Carbonyl-Index steigt von 0.02 bei Inbetriebnahme auf 0.15 nach 2 Jahren. Die Prognose zeigt einen weiteren Anstieg in den kritischen Bereich bei Jahr 6.5.">
+    Carbonyl-Index steigt von 0.02 (Jahr 0) auf 0.15 (Jahr 2). Prognose: kritischer Bereich ab ca. Jahr 6.5.
+  </canvas>
+</div>
 
-      <div class="chart-section">
-        <div class="chart-title">Humidity Levels (last 30 days)</div>
-        <div class="chart-wrapper">
-          <canvas id="humidityChart" role="img" aria-label="Line chart showing humidity levels over 30 days"></canvas>
-        </div>
-      </div>
+<div class="axis-label-x">Zeit seit Inbetriebnahme [Jahre]</div>
 
-      <div class="chart-section">
-        <div class="chart-title">UV Exposure (last 30 days)</div>
-        <div class="chart-wrapper">
-          <canvas id="uvChart" role="img" aria-label="Line chart showing UV exposure over 30 days"></canvas>
-        </div>
-      </div>
+<p class="footnote">
+  <strong>Schwellenwerte (literaturbasiert, indikativ):</strong> CI &lt; 0.3 unkritisch · 0.3–0.6 Übergangsbereich · &gt; 0.6 kritisch.
+  Quellen: Fairbrother et al. (2019), Gulmine et al. (2003).
+  Normative Grenzwerte für K-IBC aus HDPE im Gefahrgutkontext sind Gegenstand der laufenden Forschung (FF1, smartIBC).
+</p>
 
-      <div class="chart-section">
-        <div class="chart-title">Vibrations (last 30 days)</div>
-        <div class="chart-wrapper">
-          <canvas id="vibrationChart" role="img" aria-label="Line chart showing vibration levels over 30 days"></canvas>
-        </div>
-      </div>
+<h2>Detailed Material Integrity</h2>
 
-      <div class="chart-section">
-        <div class="chart-title">Shock Events (last 30 days)</div>
-        <div class="chart-wrapper">
-          <canvas id="shockChart" role="img" aria-label="Bar chart showing shock events over 30 days"></canvas>
-        </div>
-      </div>
+<div class="legend">
+  <span><span class="line-solid"></span>Messwerte (0–2 Jahre)</span>
+  <span><span class="line-dashed"></span>Prognose (ab Jahr 2)</span>
+  <span><span class="swatch" style="background:#EAF3DE;border:1px solid #97C459;"></span>Unkritisch</span>
+  <span><span class="swatch" style="background:#FAEEDA;border:1px solid #EF9F27;"></span>Übergangsbereich</span>
+  <span><span class="swatch" style="background:#FCEBEB;border:1px solid #E24B4A;"></span>Kritisch</span>
+</div>
 
-      <div class="chart-section">
-        <div class="chart-title">Filling Level (last 30 days)</div>
-        <div class="chart-wrapper">
-          <canvas id="fillingChart" role="img" aria-label="Line chart showing filling level over 30 days"></canvas>
-        </div>
-      </div>
-    </div>
-  </div>
+<div class="axis-label-y">CI [-]</div>
 
-  <script>
-    const isDark = matchMedia('(prefers-color-scheme: dark)').matches;
-    const textColor = isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)';
-    const gridColor = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)';
-    const primaryColor = '#5B4FA8';
-    const secondaryColor = '#FF9500';
-    const tertiaryColor = '#D94343';
+<div class="chart-wrap">
+  <canvas id="ciChart2" role="img" aria-label="Liniendiagramm: Carbonyl-Index steigt von 0.02 bei Inbetriebnahme auf 0.15 nach 2 Jahren. Die Prognose zeigt einen weiteren Anstieg in den kritischen Bereich bei Jahr 6.5.">
+    Carbonyl-Index steigt von 0.02 (Jahr 0) auf 0.15 (Jahr 2). Prognose: kritischer Bereich ab ca. Jahr 6.5.
+  </canvas>
+</div>
 
-    // Generate 30 day labels
-    const days30 = Array.from({length: 30}, (_, i) => `Day ${i + 1}`);
+<div class="axis-label-x">Zeit seit Inbetriebnahme [Jahre]</div>
 
-    // Generate realistic temperature data (20-26°C range)
-    const tempData = Array.from({length: 30}, () => Math.floor(Math.random() * 7) + 20);
+<p class="footnote">
+  <strong>Schwellenwerte (literaturbasiert, indikativ):</strong> CI &lt; 0.3 unkritisch · 0.3–0.6 Übergangsbereich · &gt; 0.6 kritisch.
+  Quellen: Fairbrother et al. (2019), Gulmine et al. (2003).
+  Normative Grenzwerte für K-IBC aus HDPE im Gefahrgutkontext sind Gegenstand der laufenden Forschung (FF1, smartIBC).
+</p>
 
-    // Generate realistic humidity data (40-60% range)
-    const humidityData = Array.from({length: 30}, () => Math.floor(Math.random() * 21) + 40);
+<script>
+const measured = [
+  {x: 0,    y: 0.02},
+  {x: 0.25, y: 0.03},
+  {x: 0.5,  y: 0.05},
+  {x: 0.75, y: 0.07},
+  {x: 1.0,  y: 0.09},
+  {x: 1.25, y: 0.11},
+  {x: 1.5,  y: 0.13},
+  {x: 1.75, y: 0.14},
+  {x: 2.0,  y: 0.15},
+];
 
-    // Generate UV exposure data (0.5-5 MJ/m² range)
-    const uvData = Array.from({length: 30}, () => (Math.random() * 4.5 + 0.5).toFixed(2));
+const forecast = [
+  {x: 2.0,  y: 0.15},
+  {x: 2.5,  y: 0.19},
+  {x: 3.0,  y: 0.23},
+  {x: 3.5,  y: 0.27},
+  {x: 4.0,  y: 0.32},
+  {x: 4.5,  y: 0.37},
+  {x: 5.0,  y: 0.43},
+  {x: 5.5,  y: 0.50},
+  {x: 6.0,  y: 0.56},
+  {x: 6.5,  y: 0.61},
+  {x: 7.0,  y: 0.67},
+  {x: 7.5,  y: 0.72},
+  {x: 8.0,  y: 0.76},
+];
 
-    // Generate vibration data - 0 everywhere except at day 1, days 8-10, and day 23
-    const vibrationData = Array(30).fill(0);
-    vibrationData[0] = (Math.random() * 1.5 + 0.8).toFixed(2); // Day 1: spike
-    vibrationData[7] = (Math.random() * 0.8 + 0.5).toFixed(2);  // Day 8: spike
-    vibrationData[8] = (Math.random() * 0.8 + 0.5).toFixed(2);  // Day 9: spike
-    vibrationData[9] = (Math.random() * 0.8 + 0.5).toFixed(2);  // Day 10: spike
-    vibrationData[22] = (Math.random() * 0.8 + 0.5).toFixed(2); // Day 23: spike
+Chart.register(window['chartjs-plugin-annotation']);
 
-    // Generate shock events data - mostly 0 with 2 shocks
-    const shockData = Array(30).fill(0);
-    shockData[8] = 0.3; // First shock at day 9
-    shockData[22] = 0.25; // Second shock at day 23
-
-    // Generate filling level data - starts at 100, drops to ~50%, then refills to 100%
-    const fillingData = Array.from({length: 30}, (_, i) => {
-      if (i < 5) return 100; // Full for first 5 days
-      if (i < 18) return Math.max(50, 100 - (i - 5) * 3.5); // Gradually depletes to ~50%
-      return Math.min(100, 50 + (i - 18) * 3.5); // Gradually refills to 100%
-    });
-
-    const chartDefaults = {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false },
-        filler: { propagate: true }
+// First chart
+new Chart(document.getElementById('ciChart'), {
+  type: 'scatter',
+  data: {
+    datasets: [
+      {
+        label: 'Messwerte',
+        data: measured,
+        showLine: true,
+        borderColor: '#378ADD',
+        backgroundColor: '#378ADD',
+        borderWidth: 2.5,
+        pointRadius: 4,
+        pointHoverRadius: 6,
+        tension: 0.35,
+        order: 1,
       },
-      scales: {
-        x: { 
-          grid: { color: gridColor, drawBorder: false }, 
-          ticks: { color: textColor },
-          title: { display: true, text: 'Days', color: textColor, font: { size: 12 } }
-        },
-        y: { 
-          grid: { color: gridColor, drawBorder: false }, 
-          ticks: { color: textColor }
+      {
+        label: 'Prognose',
+        data: forecast,
+        showLine: true,
+        borderColor: '#378ADD',
+        backgroundColor: 'transparent',
+        borderWidth: 2.5,
+        borderDash: [7, 5],
+        pointRadius: (ctx) => ctx.dataIndex === 0 ? 0 : 3,
+        pointHoverRadius: 5,
+        pointBackgroundColor: '#378ADD',
+        tension: 0.35,
+        order: 2,
+      },
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          label: (ctx) => `CI = ${ctx.parsed.y.toFixed(2)} (Jahr ${ctx.parsed.x.toFixed(2)})`
+        }
+      },
+      annotation: {
+        annotations: {
+          zoneOK: {
+            type: 'box',
+            xMin: 0, xMax: 8,
+            yMin: 0, yMax: 0.3,
+            backgroundColor: 'rgba(234,243,222,0.55)',
+            borderWidth: 0,
+            label: {
+              display: true,
+              content: 'Unkritisch  CI < 0.3',
+              position: { x: 'end', y: 'center' },
+              font: { size: 11, weight: '400' },
+              color: '#3B6D11',
+              padding: { right: 6 },
+            }
+          },
+          zoneWarn: {
+            type: 'box',
+            xMin: 0, xMax: 8,
+            yMin: 0.3, yMax: 0.6,
+            backgroundColor: 'rgba(250,238,218,0.55)',
+            borderWidth: 0,
+            label: {
+              display: true,
+              content: 'Übergangsbereich  0.3 – 0.6',
+              position: { x: 'end', y: 'center' },
+              font: { size: 11, weight: '400' },
+              color: '#854F0B',
+              padding: { right: 6 },
+            }
+          },
+          zoneCrit: {
+            type: 'box',
+            xMin: 0, xMax: 8,
+            yMin: 0.6, yMax: 0.9,
+            backgroundColor: 'rgba(252,235,235,0.55)',
+            borderWidth: 0,
+            label: {
+              display: true,
+              content: 'Kritisch  CI > 0.6',
+              position: { x: 'end', y: 'center' },
+              font: { size: 11, weight: '400' },
+              color: '#A32D2D',
+              padding: { right: 6 },
+            }
+          },
+          lineOK: {
+            type: 'line',
+            yMin: 0.3, yMax: 0.3,
+            borderColor: '#97C459',
+            borderWidth: 1.5,
+            borderDash: [4, 3],
+          },
+          lineCrit: {
+            type: 'line',
+            yMin: 0.6, yMax: 0.6,
+            borderColor: '#E24B4A',
+            borderWidth: 1.5,
+            borderDash: [4, 3],
+          },
+          splitLine: {
+            type: 'line',
+            xMin: 2, xMax: 2,
+            borderColor: '#888780',
+            borderWidth: 1.5,
+            borderDash: [4, 3],
+            label: {
+              display: true,
+              content: 'heute',
+              position: 'end',
+              yAdjust: -10,
+              font: { size: 10 },
+              color: '#5F5E5A',
+              backgroundColor: 'transparent',
+            }
+          },
+          critPoint: {
+            type: 'line',
+            xMin: 6.5, xMax: 6.5,
+            yMin: 0, yMax: 0.61,
+            borderColor: '#E24B4A',
+            borderWidth: 1,
+            borderDash: [3, 3],
+            label: {
+              display: true,
+              content: '6.5 Jahre',
+              position: 'start',
+              yAdjust: 8,
+              font: { size: 10 },
+              color: '#A32D2D',
+              backgroundColor: 'transparent',
+            }
+          }
         }
       }
-    };
-
-    // Temperature Chart
-    new Chart(document.getElementById('tempChart'), {
-      type: 'line',
-      data: {
-        labels: days30,
-        datasets: [{
-          label: 'Temperature',
-          data: tempData,
-          borderColor: primaryColor,
-          backgroundColor: `${primaryColor}15`,
-          borderWidth: 2,
-          fill: true,
-          tension: 0.4,
-          pointRadius: 3,
-          pointBackgroundColor: primaryColor,
-          pointBorderColor: '#fff',
-          pointBorderWidth: 1
-        }]
+    },
+    scales: {
+      x: {
+        type: 'linear',
+        min: 0,
+        max: 8,
+        grid: { color: 'rgba(136,135,128,0.15)' },
+        ticks: {
+          stepSize: 1,
+          callback: (v) => v % 1 === 0 ? v : '',
+          font: { size: 12 },
+          color: '#888780',
+        }
       },
-      options: { 
-        ...chartDefaults, 
-        scales: { 
-          ...chartDefaults.scales, 
-          y: { 
-            ...chartDefaults.scales.y, 
-            min: 15, 
-            max: 30,
-            title: { display: true, text: '°C', color: textColor, font: { size: 12 } }
-          } 
-        } 
+      y: {
+        min: 0,
+        max: 0.9,
+        grid: { color: 'rgba(136,135,128,0.15)' },
+        ticks: {
+          stepSize: 0.1,
+          callback: (v) => v.toFixed(1),
+          font: { size: 12 },
+          color: '#888780',
+        }
       }
-    });
+    }
+  }
+});
 
-    // Humidity Chart
-    new Chart(document.getElementById('humidityChart'), {
-      type: 'line',
-      data: {
-        labels: days30,
-        datasets: [{
-          label: 'Humidity',
-          data: humidityData,
-          borderColor: secondaryColor,
-          backgroundColor: `${secondaryColor}15`,
-          borderWidth: 2,
-          fill: true,
-          tension: 0.4,
-          pointRadius: 3,
-          pointBackgroundColor: secondaryColor,
-          pointBorderColor: '#fff',
-          pointBorderWidth: 1
-        }]
+// Second chart (Detailed Material Integrity)
+new Chart(document.getElementById('ciChart2'), {
+  type: 'scatter',
+  data: {
+    datasets: [
+      {
+        label: 'Messwerte',
+        data: measured,
+        showLine: true,
+        borderColor: '#378ADD',
+        backgroundColor: '#378ADD',
+        borderWidth: 2.5,
+        pointRadius: 4,
+        pointHoverRadius: 6,
+        tension: 0.35,
+        order: 1,
       },
-      options: { 
-        ...chartDefaults, 
-        scales: { 
-          ...chartDefaults.scales, 
-          y: { 
-            ...chartDefaults.scales.y, 
-            min: 30, 
-            max: 70,
-            title: { display: true, text: 'wt %', color: textColor, font: { size: 12 } }
-          } 
-        } 
-      }
-    });
-
-    // UV Exposure Chart
-    new Chart(document.getElementById('uvChart'), {
-      type: 'line',
-      data: {
-        labels: days30,
-        datasets: [{
-          label: 'UV Exposure',
-          data: uvData,
-          borderColor: '#FF6B6B',
-          backgroundColor: 'rgba(255, 107, 107, 0.15)',
-          borderWidth: 2,
-          fill: true,
-          tension: 0.4,
-          pointRadius: 3,
-          pointBackgroundColor: '#FF6B6B',
-          pointBorderColor: '#fff',
-          pointBorderWidth: 1
-        }]
+      {
+        label: 'Prognose',
+        data: forecast,
+        showLine: true,
+        borderColor: '#378ADD',
+        backgroundColor: 'transparent',
+        borderWidth: 2.5,
+        borderDash: [7, 5],
+        pointRadius: (ctx) => ctx.dataIndex === 0 ? 0 : 3,
+        pointHoverRadius: 5,
+        pointBackgroundColor: '#378ADD',
+        tension: 0.35,
+        order: 2,
       },
-      options: { 
-        ...chartDefaults, 
-        scales: { 
-          ...chartDefaults.scales, 
-          y: { 
-            ...chartDefaults.scales.y, 
-            min: 0, 
-            max: 5.5,
-            title: { display: true, text: 'MJ/m²', color: textColor, font: { size: 12 } }
-          } 
-        } 
-      }
-    });
-
-    // Vibrations Chart
-    new Chart(document.getElementById('vibrationChart'), {
-      type: 'line',
-      data: {
-        labels: days30,
-        datasets: [{
-          label: 'Vibrations',
-          data: vibrationData,
-          borderColor: '#9966CC',
-          backgroundColor: 'rgba(153, 102, 204, 0.15)',
-          borderWidth: 2,
-          fill: true,
-          tension: 0.4,
-          pointRadius: 3,
-          pointBackgroundColor: '#9966CC',
-          pointBorderColor: '#fff',
-          pointBorderWidth: 1
-        }]
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          label: (ctx) => `CI = ${ctx.parsed.y.toFixed(2)} (Jahr ${ctx.parsed.x.toFixed(2)})`
+        }
       },
-      options: { 
-        ...chartDefaults, 
-        scales: { 
-          ...chartDefaults.scales, 
-          y: { 
-            ...chartDefaults.scales.y, 
-            min: 0, 
-            max: 2,
-            title: { display: true, text: 'm/s²', color: textColor, font: { size: 12 } }
-          } 
-        } 
+      annotation: {
+        annotations: {
+          zoneOK: {
+            type: 'box',
+            xMin: 0, xMax: 8,
+            yMin: 0, yMax: 0.3,
+            backgroundColor: 'rgba(234,243,222,0.55)',
+            borderWidth: 0,
+            label: {
+              display: true,
+              content: 'Unkritisch  CI < 0.3',
+              position: { x: 'end', y: 'center' },
+              font: { size: 11, weight: '400' },
+              color: '#3B6D11',
+              padding: { right: 6 },
+            }
+          },
+          zoneWarn: {
+            type: 'box',
+            xMin: 0, xMax: 8,
+            yMin: 0.3, yMax: 0.6,
+            backgroundColor: 'rgba(250,238,218,0.55)',
+            borderWidth: 0,
+            label: {
+              display: true,
+              content: 'Übergangsbereich  0.3 – 0.6',
+              position: { x: 'end', y: 'center' },
+              font: { size: 11, weight: '400' },
+              color: '#854F0B',
+              padding: { right: 6 },
+            }
+          },
+          zoneCrit: {
+            type: 'box',
+            xMin: 0, xMax: 8,
+            yMin: 0.6, yMax: 0.9,
+            backgroundColor: 'rgba(252,235,235,0.55)',
+            borderWidth: 0,
+            label: {
+              display: true,
+              content: 'Kritisch  CI > 0.6',
+              position: { x: 'end', y: 'center' },
+              font: { size: 11, weight: '400' },
+              color: '#A32D2D',
+              padding: { right: 6 },
+            }
+          },
+          lineOK: {
+            type: 'line',
+            yMin: 0.3, yMax: 0.3,
+            borderColor: '#97C459',
+            borderWidth: 1.5,
+            borderDash: [4, 3],
+          },
+          lineCrit: {
+            type: 'line',
+            yMin: 0.6, yMax: 0.6,
+            borderColor: '#E24B4A',
+            borderWidth: 1.5,
+            borderDash: [4, 3],
+          },
+          splitLine: {
+            type: 'line',
+            xMin: 2, xMax: 2,
+            borderColor: '#888780',
+            borderWidth: 1.5,
+            borderDash: [4, 3],
+            label: {
+              display: true,
+              content: 'heute',
+              position: 'end',
+              yAdjust: -10,
+              font: { size: 10 },
+              color: '#5F5E5A',
+              backgroundColor: 'transparent',
+            }
+          },
+          critPoint: {
+            type: 'line',
+            xMin: 6.5, xMax: 6.5,
+            yMin: 0, yMax: 0.61,
+            borderColor: '#E24B4A',
+            borderWidth: 1,
+            borderDash: [3, 3],
+            label: {
+              display: true,
+              content: '6.5 Jahre',
+              position: 'start',
+              yAdjust: 8,
+              font: { size: 10 },
+              color: '#A32D2D',
+              backgroundColor: 'transparent',
+            }
+          }
+        }
       }
-    });
-
-    // Shock Events Chart
-    new Chart(document.getElementById('shockChart'), {
-      type: 'bar',
-      data: {
-        labels: days30,
-        datasets: [{
-          label: 'Shock Events',
-          data: shockData,
-          backgroundColor: tertiaryColor,
-          borderColor: tertiaryColor,
-          borderWidth: 0,
-          borderRadius: 4
-        }]
+    },
+    scales: {
+      x: {
+        type: 'linear',
+        min: 0,
+        max: 8,
+        grid: { color: 'rgba(136,135,128,0.15)' },
+        ticks: {
+          stepSize: 1,
+          callback: (v) => v % 1 === 0 ? v : '',
+          font: { size: 12 },
+          color: '#888780',
+        }
       },
-      options: { 
-        ...chartDefaults, 
-        scales: { 
-          ...chartDefaults.scales, 
-          y: { 
-            ...chartDefaults.scales.y, 
-            min: 0, 
-            max: 0.5,
-            title: { display: true, text: 'Intensity', color: textColor, font: { size: 12 } }
-          } 
-        } 
+      y: {
+        min: 0,
+        max: 0.9,
+        grid: { color: 'rgba(136,135,128,0.15)' },
+        ticks: {
+          stepSize: 0.1,
+          callback: (v) => v.toFixed(1),
+          font: { size: 12 },
+          color: '#888780',
+        }
       }
-    });
-
-    // Filling Level Chart
-    new Chart(document.getElementById('fillingChart'), {
-      type: 'line',
-      data: {
-        labels: days30,
-        datasets: [{
-          label: 'Filling Level',
-          data: fillingData,
-          borderColor: '#3FB950',
-          backgroundColor: 'rgba(63, 185, 80, 0.15)',
-          borderWidth: 2,
-          fill: true,
-          tension: 0.4,
-          pointRadius: 3,
-          pointBackgroundColor: '#3FB950',
-          pointBorderColor: '#fff',
-          pointBorderWidth: 1
-        }]
-      },
-      options: { 
-        ...chartDefaults, 
-        scales: { 
-          ...chartDefaults.scales, 
-          y: { 
-            ...chartDefaults.scales.y, 
-            min: 0, 
-            max: 110,
-            title: { display: true, text: '%', color: textColor, font: { size: 12 } }
-          } 
-        } 
-      }
-    });
-  </script>
+    }
+  }
+});
+</script>
 </body>
 </html>
