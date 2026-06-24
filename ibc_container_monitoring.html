@@ -341,11 +341,13 @@
     // Generate UV exposure data (0.5-5 MJ/m² range)
     const uvData = Array.from({length: 30}, () => (Math.random() * 4.5 + 0.5).toFixed(2));
 
-    // Generate vibration data - spike at start, then mostly 0
-    const vibrationData = Array.from({length: 30}, (_, i) => {
-      if (i === 0) return (Math.random() * 1.5 + 0.8).toFixed(2); // Initial spike
-      return (Math.random() * 0.2).toFixed(2); // Very low after
-    });
+    // Generate vibration data - 0 everywhere except at day 1, days 8-10, and day 23
+    const vibrationData = Array(30).fill(0);
+    vibrationData[0] = (Math.random() * 1.5 + 0.8).toFixed(2); // Day 1: spike
+    vibrationData[7] = (Math.random() * 0.8 + 0.5).toFixed(2);  // Day 8: spike
+    vibrationData[8] = (Math.random() * 0.8 + 0.5).toFixed(2);  // Day 9: spike
+    vibrationData[9] = (Math.random() * 0.8 + 0.5).toFixed(2);  // Day 10: spike
+    vibrationData[22] = (Math.random() * 0.8 + 0.5).toFixed(2); // Day 23: spike
 
     // Generate shock events data - mostly 0 with 2 shocks
     const shockData = Array(30).fill(0);
