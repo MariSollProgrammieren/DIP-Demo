@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>IBC Monitoring</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-annotation/3.0.1/chartjs-plugin-annotation.min.js"></script>
   <style>
     :root {
       --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -204,6 +205,11 @@
       height: 350px; 
     }
 
+    .chart-wrapper-tall {
+      position: relative;
+      height: 420px;
+    }
+
     .degradation-section { 
       background: linear-gradient(135deg, rgba(100, 100, 150, 0.08), rgba(150, 100, 200, 0.08)); 
       border: 0.5px solid var(--color-border-tertiary); 
@@ -268,6 +274,56 @@
 
     .warning-box strong { 
       color: var(--color-text-warning); 
+    }
+
+    .ci-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-bottom: 14px;
+      font-size: 12px;
+      color: var(--color-text-secondary);
+      align-items: center;
+    }
+
+    .ci-legend span {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .ci-swatch {
+      width: 10px;
+      height: 10px;
+      border-radius: 2px;
+      display: inline-block;
+      flex-shrink: 0;
+    }
+
+    .ci-line-solid {
+      width: 24px;
+      height: 3px;
+      background: #378ADD;
+      border-radius: 2px;
+      display: inline-block;
+      flex-shrink: 0;
+    }
+
+    .ci-line-dashed {
+      width: 24px;
+      height: 0;
+      border-top: 2.5px dashed #378ADD;
+      display: inline-block;
+      flex-shrink: 0;
+    }
+
+    .ci-footnote {
+      font-size: 11px;
+      color: var(--color-text-secondary);
+      margin-top: 12px;
+      line-height: 1.6;
+      border-top: 0.5px solid var(--color-border-tertiary);
+      padding-top: 10px;
     }
   </style>
 </head>
@@ -378,6 +434,27 @@
           <canvas id="fillingChart" role="img" aria-label="Line chart showing filling level over 30 days"></canvas>
         </div>
       </div>
+
+      <!-- ── Carbonyl Index Chart ── -->
+      <div class="chart-section">
+        <div class="chart-title">Carbonyl Index (since Production) </div>
+        <div class="ci-legend">
+          <span><span class="ci-line-solid"></span>True values (0–2 y)</span>
+          <span><span class="ci-line-dashed"></span>Forecast (+2 y)</span>
+          <span><span class="ci-swatch" style="background:rgba(234,243,222,0.9);border:1px solid #97C459;"></span>Uncritical</span>
+          <span><span class="ci-swatch" style="background:rgba(250,238,218,0.9);border:1px solid #EF9F27;"></span>Transition Zone</span>
+          <span><span class="ci-swatch" style="background:rgba(252,235,235,0.9);border:1px solid #E24B4A;"></span>Critical</span>
+        </div>
+        <div class="chart-wrapper-tall">
+          <canvas id="ciChart" role="img" aria-label="Scatter line chart showing carbonyl index rising from 0.02 at year 0 to 0.15 at year 2, then a dashed forecast projection entering the critical zone at year 6.5.">
+            Carbonyl-Index steigt von 0.02 (Jahr 0) auf 0.15 (Jahr 2). Prognose: kritischer Bereich ab ca. Jahr 6.5.
+          </canvas>
+        </div>
+        <p class="ci-footnote">
+          <strong>Important:</strong> AI-generated values, true critical C-Zones tbd
+        </p>
+      </div>
+
     </div>
   </div>
 
@@ -403,22 +480,22 @@
 
     // Generate vibration data - 0 everywhere except at day 1, days 8-10, and day 23
     const vibrationData = Array(30).fill(0);
-    vibrationData[0] = (Math.random() * 1.5 + 0.8).toFixed(2); // Day 1: spike
-    vibrationData[7] = (Math.random() * 0.8 + 0.5).toFixed(2);  // Day 8: spike
-    vibrationData[8] = (Math.random() * 0.8 + 0.5).toFixed(2);  // Day 9: spike
-    vibrationData[9] = (Math.random() * 0.8 + 0.5).toFixed(2);  // Day 10: spike
-    vibrationData[22] = (Math.random() * 0.8 + 0.5).toFixed(2); // Day 23: spike
+    vibrationData[0] = (Math.random() * 1.5 + 0.8).toFixed(2);
+    vibrationData[7] = (Math.random() * 0.8 + 0.5).toFixed(2);
+    vibrationData[8] = (Math.random() * 0.8 + 0.5).toFixed(2);
+    vibrationData[9] = (Math.random() * 0.8 + 0.5).toFixed(2);
+    vibrationData[22] = (Math.random() * 0.8 + 0.5).toFixed(2);
 
     // Generate shock events data - mostly 0 with 2 shocks
     const shockData = Array(30).fill(0);
-    shockData[8] = 0.3; // First shock at day 9
-    shockData[22] = 0.25; // Second shock at day 23
+    shockData[8] = 0.3;
+    shockData[22] = 0.25;
 
-    // Generate filling level data - starts at 100, drops to ~50%, then refills to 100%
+    // Generate filling level data
     const fillingData = Array.from({length: 30}, (_, i) => {
-      if (i < 5) return 100; // Full for first 5 days
-      if (i < 18) return Math.max(50, 100 - (i - 5) * 3.5); // Gradually depletes to ~50%
-      return Math.min(100, 50 + (i - 18) * 3.5); // Gradually refills to 100%
+      if (i < 5) return 100;
+      if (i < 18) return Math.max(50, 100 - (i - 5) * 3.5);
+      return Math.min(100, 50 + (i - 18) * 3.5);
     });
 
     const chartDefaults = {
@@ -631,6 +708,204 @@
             title: { display: true, text: '%', color: textColor, font: { size: 12 } }
           } 
         } 
+      }
+    });
+
+    // Carbonyl Index Chart
+    const ciMeasured = [
+      {x: 0,    y: 0.02},
+      {x: 0.25, y: 0.03},
+      {x: 0.5,  y: 0.05},
+      {x: 0.75, y: 0.07},
+      {x: 1.0,  y: 0.09},
+      {x: 1.25, y: 0.11},
+      {x: 1.5,  y: 0.13},
+      {x: 1.75, y: 0.14},
+      {x: 2.0,  y: 0.15},
+    ];
+
+    const ciForecast = [
+      {x: 2.0,  y: 0.15},
+      {x: 2.5,  y: 0.19},
+      {x: 3.0,  y: 0.23},
+      {x: 3.5,  y: 0.27},
+      {x: 4.0,  y: 0.32},
+      {x: 4.5,  y: 0.37},
+      {x: 5.0,  y: 0.43},
+      {x: 5.5,  y: 0.50},
+      {x: 6.0,  y: 0.56},
+      {x: 6.5,  y: 0.61},
+      {x: 7.0,  y: 0.67},
+      {x: 7.5,  y: 0.72},
+      {x: 8.0,  y: 0.76},
+    ];
+
+    new Chart(document.getElementById('ciChart'), {
+      type: 'scatter',
+      data: {
+        datasets: [
+          {
+            label: 'Messwerte',
+            data: ciMeasured,
+            showLine: true,
+            borderColor: '#378ADD',
+            backgroundColor: '#378ADD',
+            borderWidth: 2.5,
+            pointRadius: 4,
+            pointHoverRadius: 6,
+            tension: 0.35,
+            order: 1,
+          },
+          {
+            label: 'Prognose',
+            data: ciForecast,
+            showLine: true,
+            borderColor: '#378ADD',
+            backgroundColor: 'transparent',
+            borderWidth: 2.5,
+            borderDash: [7, 5],
+            pointRadius: (ctx) => ctx.dataIndex === 0 ? 0 : 3,
+            pointHoverRadius: 5,
+            pointBackgroundColor: '#378ADD',
+            tension: 0.35,
+            order: 2,
+          },
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: (ctx) => `CI = ${ctx.parsed.y.toFixed(2)} (Jahr ${ctx.parsed.x.toFixed(2)})`
+            }
+          },
+          annotation: {
+            annotations: {
+              zoneOK: {
+                type: 'box',
+                xMin: 0, xMax: 8,
+                yMin: 0, yMax: 0.3,
+                backgroundColor: 'rgba(234,243,222,0.55)',
+                borderWidth: 0,
+                label: {
+                  display: true,
+                  content: 'Unkritisch  CI < 0.3',
+                  position: { x: 'end', y: 'center' },
+                  font: { size: 11, weight: '400' },
+                  color: '#3B6D11',
+                  padding: { right: 6 },
+                }
+              },
+              zoneWarn: {
+                type: 'box',
+                xMin: 0, xMax: 8,
+                yMin: 0.3, yMax: 0.6,
+                backgroundColor: 'rgba(250,238,218,0.55)',
+                borderWidth: 0,
+                label: {
+                  display: true,
+                  content: 'Übergangsbereich  0.3 – 0.6',
+                  position: { x: 'end', y: 'center' },
+                  font: { size: 11, weight: '400' },
+                  color: '#854F0B',
+                  padding: { right: 6 },
+                }
+              },
+              zoneCrit: {
+                type: 'box',
+                xMin: 0, xMax: 8,
+                yMin: 0.6, yMax: 0.9,
+                backgroundColor: 'rgba(252,235,235,0.55)',
+                borderWidth: 0,
+                label: {
+                  display: true,
+                  content: 'Kritisch  CI > 0.6',
+                  position: { x: 'end', y: 'center' },
+                  font: { size: 11, weight: '400' },
+                  color: '#A32D2D',
+                  padding: { right: 6 },
+                }
+              },
+              lineOK: {
+                type: 'line',
+                yMin: 0.3, yMax: 0.3,
+                borderColor: '#97C459',
+                borderWidth: 1.5,
+                borderDash: [4, 3],
+              },
+              lineCrit: {
+                type: 'line',
+                yMin: 0.6, yMax: 0.6,
+                borderColor: '#E24B4A',
+                borderWidth: 1.5,
+                borderDash: [4, 3],
+              },
+              splitLine: {
+                type: 'line',
+                xMin: 2, xMax: 2,
+                borderColor: gridColor,
+                borderWidth: 1.5,
+                borderDash: [4, 3],
+                label: {
+                  display: true,
+                  content: 'today',
+                  position: 'end',
+                  yAdjust: -10,
+                  font: { size: 10 },
+                  color: textColor,
+                  backgroundColor: 'transparent',
+                }
+              },
+              critPoint: {
+                type: 'line',
+                xMin: 6.5, xMax: 6.5,
+                yMin: 0, yMax: 0.61,
+                borderColor: '#E24B4A',
+                borderWidth: 1,
+                borderDash: [3, 3],
+                label: {
+                  display: true,
+                  content: '6.5 y: EoL-Forecast',
+                  position: 'start',
+                  yAdjust: 8,
+                  font: { size: 10 },
+                  color: '#A32D2D',
+                  backgroundColor: 'transparent',
+                }
+              }
+            }
+          }
+        },
+        scales: {
+          x: {
+            type: 'linear',
+            min: 0,
+            max: 8,
+            grid: { color: gridColor, drawBorder: false },
+            ticks: {
+              stepSize: 1,
+              callback: (v) => v % 1 === 0 ? v : '',
+              color: textColor,
+              font: { size: 12 }
+            },
+            title: { display: true, text: 'y', color: textColor, font: { size: 12 } }
+          },
+          y: {
+            min: 0,
+            max: 0.9,
+            grid: { color: gridColor, drawBorder: false },
+            ticks: {
+              stepSize: 0.1,
+              callback: (v) => v.toFixed(1),
+              color: textColor,
+              font: { size: 12 }
+            },
+            title: { display: true, text: 'CI [-]', color: textColor, font: { size: 12 } }
+          }
+        }
       }
     });
   </script>
