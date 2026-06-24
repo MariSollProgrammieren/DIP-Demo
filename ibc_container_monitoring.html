@@ -72,6 +72,7 @@
       font-size: 13px; 
       font-weight: 500; 
       margin-top: 0.5rem; 
+      margin-right: 1rem;
     }
 
     .status-good { 
@@ -87,6 +88,43 @@
     .status-critical { 
       background: rgba(255, 100, 100, 0.15); 
       color: var(--color-text-danger); 
+    }
+
+    .cycles-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 12px;
+      margin-top: 1rem;
+    }
+
+    .cycle-card {
+      background: var(--color-background-secondary);
+      padding: 0.75rem;
+      border-radius: 8px;
+      border: 0.5px solid var(--color-border-tertiary);
+      text-align: center;
+    }
+
+    .cycle-label {
+      font-size: 11px;
+      color: var(--color-text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 0.5rem;
+    }
+
+    .cycle-value {
+      font-size: 24px;
+      font-weight: 600;
+      color: var(--color-text-primary);
+    }
+
+    .section-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      margin-top: 2rem;
+      margin-bottom: 1rem;
     }
 
     .metrics-grid { 
@@ -237,10 +275,43 @@
   <div class="container">
     <div class="header">
       <h1>IBC Monitoring</h1>
-      <p>Container ID: 550e8400-e29b-41d4-a716-446655440000 | Material: HDPE | Type: 31HA1</p>
-      <div class="status-badge status-good">✓ In Use</div>
+      <p>Container ID: 550e8400-e29b-41d4-a716-446655440000 | Material: HDPE | Type: 31HA1 | Production date: 24.06.2024</p>
+      <div style="display: flex; align-items: center; flex-wrap: wrap;">
+        <div class="status-badge status-good">✓ In Use</div>
+        <div class="cycles-container" style="margin-top: 0; flex: 1; min-width: 300px;">
+          <div class="cycle-card">
+            <div class="cycle-label">Repair Cycles</div>
+            <div class="cycle-value">0</div>
+          </div>
+          <div class="cycle-card">
+            <div class="cycle-label">Washing Cycles</div>
+            <div class="cycle-value">3</div>
+          </div>
+          <div class="cycle-card">
+            <div class="cycle-label">Filling Cycles</div>
+            <div class="cycle-value">4</div>
+          </div>
+          <div class="cycle-card">
+            <div class="cycle-label">Different Filling goods</div>
+            <div class="cycle-value">1</div>
+          </div>
+        </div>
+      </div>
     </div>
 
+    <div class="degradation-section">
+      <div class="degradation-title">Material Degradation Index</div>
+      <div class="degradation-bar">
+        <div class="degradation-fill" style="width: 89%;"></div>
+      </div>
+      <div style="font-size: 13px; color: var(--color-text-secondary); margin-bottom: 1rem;">Index indicates 89% probability of continued usability</div>
+
+      <div class="warning-box">
+        <strong>⚠ Note:</strong> Container remains suitable for filling dangerous goods.
+      </div>
+    </div>
+
+    <div class="section-title">Current Statistics</div>
     <div class="metrics-grid">
       <div class="metric-card">
         <div class="metric-label">Temperature</div>
@@ -264,18 +335,7 @@
       </div>
     </div>
 
-    <div class="degradation-section">
-      <div class="degradation-title">Material Degradation Index</div>
-      <div class="degradation-bar">
-        <div class="degradation-fill" style="width: 89%;"></div>
-      </div>
-      <div style="font-size: 13px; color: var(--color-text-secondary); margin-bottom: 1rem;">Index indicates 89% probability of continued usability</div>
-
-      <div class="warning-box">
-        <strong>⚠ Note:</strong> Container remains suitable for filling dangerous goods.
-      </div>
-    </div>
-
+    <div class="section-title">Detailed Insight</div>
     <div class="charts-grid">
       <div class="chart-section">
         <div class="chart-title">Temperature Trend (last 30 days)</div>
