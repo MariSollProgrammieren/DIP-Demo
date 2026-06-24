@@ -1,0 +1,33 @@
+<!-- Minimalstruktur eines Digital Nameplate für IBC -->
+<Submodel>
+  <IdShort>DigitalNameplate</IdShort>
+  <Id>https://my-company.com/ibc/nameplate</Id>
+  
+  <!-- SubmodelElements (die wichtigen Felder) -->
+  <SubmodelElements>
+    
+    <!-- Manufacturer Info -->
+    <SubmodelElementCollection>
+      <IdShort>ManufacturerData</IdShort>
+      <Value>
+        <Property>
+          <IdShort>CompanyName</IdShort>
+          <Value>MeinHersteller GmbH</Value>
+        </Property>
+      </Value>
+    </SubmodelElementCollection>
+    
+    <!-- Produktidentifikation -->
+    <Property>
+      <IdShort>SerialNumber</IdShort>
+      <Value>IBC-2024-001234</Value>
+    </Property>
+    
+    <Property>
+      <IdShort>ModelNumber</IdShort>
+      <Value>IBC-1000L</Value>
+    </Property>
+    
+    <!-- Weitere wichtige Felder... -->
+  </SubmodelElements>
+</Submodel> 
