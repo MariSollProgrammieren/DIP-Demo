@@ -4,9 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>IBC Monitoring</title>
-  <style>
-    .bam-logo { position: absolute; top: 2rem; right: 1.5rem; height: 52px; width: auto; }
-  </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-annotation/3.0.1/chartjs-plugin-annotation.min.js"></script>
   <style>
@@ -332,32 +329,31 @@
 </head>
 <body>
   <div class="container">
-    <img src="data:image/png;base64,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
-      <div class="header">
-        <h1>IBC Monitoring</h1>
-        <p>Container ID: 550e8400-e29b-41d4-a716-446655440000 | Material: HDPE | Type: 31HA1 | Production date: 24.06.2024</p>
-        <div style="display: flex; align-items: center; flex-wrap: wrap;">
-          <div class="status-badge status-good">✓ In Use</div>
-          <div class="cycles-container" style="margin-top: 0; flex: 1; min-width: 300px;">
-            <div class="cycle-card">
-              <div class="cycle-label">Repair Cycles</div>
-              <div class="cycle-value">0</div>
-            </div>
-            <div class="cycle-card">
-              <div class="cycle-label">Washing Cycles</div>
-              <div class="cycle-value">3</div>
-            </div>
-            <div class="cycle-card">
-              <div class="cycle-label">Filling Cycles</div>
-              <div class="cycle-value">4</div>
-            </div>
-            <div class="cycle-card">
-              <div class="cycle-label">Different Filling goods</div>
-              <div class="cycle-value">1</div>
-            </div>
+    <div class="header">
+      <h1>IBC Monitoring</h1>
+      <p>Container ID: 550e8400-e29b-41d4-a716-446655440000 | Material: HDPE | Type: 31HA1 | Production date: 24.06.2024</p>
+      <div style="display: flex; align-items: center; flex-wrap: wrap;">
+        <div class="status-badge status-good">✓ In Use</div>
+        <div class="cycles-container" style="margin-top: 0; flex: 1; min-width: 300px;">
+          <div class="cycle-card">
+            <div class="cycle-label">Repair Cycles</div>
+            <div class="cycle-value">0</div>
+          </div>
+          <div class="cycle-card">
+            <div class="cycle-label">Washing Cycles</div>
+            <div class="cycle-value">3</div>
+          </div>
+          <div class="cycle-card">
+            <div class="cycle-label">Filling Cycles</div>
+            <div class="cycle-value">4</div>
+          </div>
+          <div class="cycle-card">
+            <div class="cycle-label">Different Filling goods</div>
+            <div class="cycle-value">1</div>
           </div>
         </div>
       </div>
+    </div>
 
     <div class="degradation-section">
       <div class="degradation-title">Material Degradation Index</div>
