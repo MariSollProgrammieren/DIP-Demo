@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+          <!--STYLING-->
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DPP-Prototyp · smartIBC</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#14181B;
+    --surface:#1D2327;
+    --surface-alt:#252C31;
+    --border:#333B40;
+    --text:#E8EAEB;
+    --muted:#8B959A;
+    --amber:#E8A23D;
+    --amber-dim:#7A5B26;
+    --red:#D6614A;
+    --green:#5FAE84;
+    --mono:'IBM Plex Mono', monospace;
+    --sans:'IBM Plex Sans', sans-serif;
+    --display:'Barlow Semi Condensed', sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:var(--sans); font-size:14px; line-height:1.5;
+  }
+  header{
+    border-bottom:1px solid var(--border);
+    padding:20px 28px;
+    display:flex; align-items:center; justify-content:space-between; gap:20px;
+    flex-wrap:wrap;
+  }
+  .brand{display:flex; align-items:baseline; gap:10px;}
+  .brand h1{
+    font-family:var(--display); font-weight:700; font-size:22px; letter-spacing:0.02em;
+    margin:0; text-transform:uppercase;
+  }
+  .brand span{color:var(--amber); font-family:var(--mono); font-size:12px;}
+  .toolbar{display:flex; gap:10px; flex-wrap:wrap; align-items:center;}
+  button, .btn{
+    background:var(--surface-alt); color:var(--text); border:1px solid var(--border);
+    padding:8px 14px; border-radius:3px; font-family:var(--sans); font-size:13px;
+    cursor:pointer; transition:border-color .15s;
+  }
+  button:hover, .btn:hover{border-color:var(--amber);}
+  button.primary{background:var(--amber); color:#1a1508; border-color:var(--amber); font-weight:600;}
+  button.primary:hover{opacity:.9;}
+  input[type=file]{display:none;}
+
+  .layout{display:grid; grid-template-columns:280px 1fr; min-height:calc(100vh - 73px);}
+  aside{border-right:1px solid var(--border); padding:24px; background:var(--surface);}
+  .role-card{
+    border:1px solid var(--amber-dim); background:var(--surface-alt); border-radius:6px;
+    padding:16px; margin-bottom:20px;
+  }
+  .role-card .eyebrow{font-family:var(--mono); font-size:10px; color:var(--amber); letter-spacing:.1em; text-transform:uppercase;}
+  select#roleSelect{
+    width:100%; margin-top:8px; padding:10px; background:var(--bg); color:var(--text);
+    border:1px solid var(--border); border-radius:4px; font-family:var(--display); font-size:16px;
+  }
+  .role-desc{margin-top:10px; font-size:12.5px; color:var(--muted);}
+  nav .navlabel{font-family:var(--mono); font-size:10px; color:var(--muted); letter-spacing:.1em; text-transform:uppercase; margin:18px 0 8px;}
+  nav a{
+    display:flex; gap:8px; align-items:center; padding:7px 8px; border-radius:4px;
+    color:var(--text); text-decoration:none; font-size:13px; cursor:pointer;
+  }
+  nav a:hover{background:var(--surface-alt);}
+  nav a .n{font-family:var(--mono); color:var(--muted); font-size:11px; width:20px;}
+  nav a .tag{margin-left:auto; font-family:var(--mono); font-size:10px; padding:2px 6px; border-radius:3px;}
+  .tag-I{background:rgba(232,162,61,.18); color:var(--amber);}
+  .tag-R{background:rgba(139,149,154,.18); color:var(--muted);}
+
+  main{padding:28px 32px; max-width:900px;}
+  .card{
+    background:var(--surface); border:1px solid var(--border); border-radius:6px;
+    margin-bottom:20px; overflow:hidden;
+  }
+  .card-head{
+    display:flex; align-items:center; gap:12px; padding:16px 20px;
+    border-bottom:1px solid var(--border); background:var(--surface-alt);
+  }
+  .card-head .num{font-family:var(--mono); color:var(--amber); font-size:13px;}
+  .card-head h2{font-family:var(--display); font-size:19px; margin:0; font-weight:600; text-transform:uppercase; letter-spacing:.02em;}
+  .card-head .access-badge{
+    margin-left:auto; font-family:var(--mono); font-size:11px; padding:4px 9px; border-radius:12px; border:1px solid;
+  }
+  .access-badge.I{color:var(--amber); border-color:var(--amber-dim);}
+  .access-badge.R{color:var(--muted); border-color:var(--border);}
+  .card-body{padding:18px 20px;}
+  .note{
+    font-size:12.5px; color:var(--muted); background:var(--surface-alt); border-left:3px solid var(--amber-dim);
+    padding:8px 12px; margin-bottom:14px; border-radius:0 4px 4px 0;
+  }
+  .field-grid{display:grid; grid-template-columns:1fr 1fr; gap:12px 16px;}
+  .field{display:flex; flex-direction:column; gap:5px;}
+  .field.full{grid-column:1/-1;}
+  .field label{font-size:12px; color:var(--muted);}
+  .field input, .field select, .field textarea{
+    background:var(--bg); border:1px solid var(--border); color:var(--text);
+    padding:8px 10px; border-radius:4px; font-family:var(--sans); font-size:13.5px;
+  }
+  .field textarea{resize:vertical; min-height:52px;}
+  .readval{
+    padding:8px 10px; background:var(--bg); border:1px solid var(--border); border-radius:4px;
+    font-family:var(--mono); font-size:13px; color:var(--text); min-height:18px;
+  }
+  .readval.empty{color:var(--muted); font-style:italic; font-family:var(--sans);}
+  .imported-tag{
+    display:inline-block; font-family:var(--mono); font-size:9.5px; color:var(--amber);
+    border:1px solid var(--amber-dim); border-radius:3px; padding:1px 5px; margin-left:6px;
+  }
+  .import-row{margin-bottom:16px; display:flex; align-items:center; gap:12px; flex-wrap:wrap;}
+  table{width:100%; border-collapse:collapse; margin-top:6px; font-size:12.5px;}
+  th, td{text-align:left; padding:7px 9px; border-bottom:1px solid var(--border);}
+  th{font-family:var(--mono); font-size:10.5px; color:var(--muted); text-transform:uppercase; letter-spacing:.05em;}
+  .empty-state{color:var(--muted); font-style:italic; padding:10px 0; font-size:13px;}
+  .add-entry-btn{margin-top:12px;}
+  .matrix-wrap{overflow-x:auto;}
+  .matrix-wrap table th, .matrix-wrap table td{text-align:center; font-family:var(--mono); font-size:11.5px;}
+  .matrix-wrap table td:first-child, .matrix-wrap table th:first-child{text-align:left; font-family:var(--sans);}
+  .cell-I{color:var(--amber); font-weight:600;}
+  .cell-R{color:var(--muted);}
+  .cell-dash{color:var(--border);}
+  .timeline-info{
+    font-size:12.5px; background:var(--surface-alt); border:1px solid var(--border); border-radius:4px;
+    padding:10px 12px; margin-bottom:14px; display:flex; gap:20px; flex-wrap:wrap;
+  }
+  .timeline-info b{color:var(--amber); font-family:var(--mono); font-weight:500;}
+  .hidden{display:none;}
+  footer{padding:20px 32px; color:var(--muted); font-size:12px; border-top:1px solid var(--border);}
+</style>
+</head>
+<body>
+
+          <!--ÜBERSCHRIFT-->
+<header>
+  <div class="brand">
+    <h1>DIP - Willkommen beim digitaleb IBC-Pass der BAM</h1>
+  </div>
+  <div class="toolbar">
+    <button id="showMatrixBtn">Zugriffsmatrix anzeigen</button>
+    <button id="loadBtn">JSON laden</button>
+    <input type="file" id="fileInput" accept="application/json">
+    <button class="primary" id="downloadBtn">DPP als JSON herunterladen</button>
+  </div>
+</header>
+
+          <!--LINKS-->
+<div class="layout">
+  <aside>
+    <div class="role-card">
+      <div class="eyebrow">Aktive Rolle</div>
+      <select id="roleSelect"></select>
+      <div class="role-desc" id="roleDesc"></div>
+    </div>
+    <div class="navlabel">Lebenszyklus</div>
+    <nav id="navList"></nav>
+  </aside>
+
+  <main id="main"></main>
+</div>
+
+          <!--UNTEN-->
+<footer>
+  Prototyp · Die Daten werden nur im Browser-Speicher gehalten (kein Server). Eingegebene Daten können über „JSON herunterladen" gesichert und über „JSON laden" wieder eingespielt werden.
+</footer>
+
+<script>
+const STAKEHOLDERS = [
+  {id:'H',   name:'Hersteller',            desc:'Stellt den IBC her.'},
+  {id:'BF',  name:'Betreiber',             desc:'Nutzt und befüllt den IBC.'},
+  {id:'S',   name:'Spediteur',             desc:'Transportiert den IBC.'},
+  {id:'IS',  name:'Inspektionsstelle',     desc:'Führt gesetzlich vorgeschriebene Inspektionen durch.'},
+  {id:'C',   name:'Reinigungsdienst',      desc:'Reinigt den IBC zwischen Einsätzen.'},
+  {id:'REP', name:'Reparaturdienst',       desc:'Repariert Schäden.'},
+  {id:'REC', name:'Recyclingunternehmen',  desc:'Verwertet den Container am EoL.'},
+  {id:'BAM', name:'BAM',                   desc:'Zulassungs- und Aufsichtsbehörde für IBC in DE.'},
+  {id:'E',   name:'Endkunde',              desc:'Öffentlicher Zugriff.'},
+];
+
+const SUBMODELS = [
+  {
+    num:'01', id:'produktidentifikation', title:'Produktidentifikation', type:'single',
+    access:{H:'I',BF:'R',S:'R',IS:'R',C:'R',REP:'R',REC:'R',BAM:'R',E:'R'},
+    fields:[
+      {key:'seriennummer', label:'Seriennummer (UUIDv4)', type:'uuid'},
+      {key:'herstellerID', label:'Hersteller-ID', type:'text', placeholder:'z. B. HST-2026-0447'},
+      {key:'bauart', label:'Bauart', type:'select', options:['31H1','31H2','31HA1','31HZ1']},
+      {key:'zulassungsnummer', label:'Zulassungsnummer', type:'text', placeholder:'z. B. D/BAM 12345'},
+    ],
+    importBtn:{label:'TES-Abruf simulieren', note:'Ruft Zulassungsinhaber, Hersteller und Herstellerabkürzung über die TES anhand von Bauart + Zulassungsnummer ab.',
+      fills:{zulassungsinhaber:'Muster Behälterbau GmbH', herstellerName:'Muster Behälterbau GmbH', herstellerAbk:'MBB'}},
+    importedFields:[
+      {key:'zulassungsinhaber', label:'Zulassungsinhaber'},
+      {key:'herstellerName', label:'Hersteller'},
+      {key:'herstellerAbk', label:'Herstellerabkürzung'},
+    ]
+  },
+  {
+    num:'02', id:'technischeDaten', title:'Technische Daten', type:'single',
+    access:{H:'I',BF:'R',S:'R',IS:'R',C:'R',REP:'R',REC:'R',BAM:'R',E:'R'},
+    note:'Wird automatisiert über die TES anhand von Zulassungsnummer + Bauart abgerufen; der Zulassungsschein wird 1:1 übernommen.',
+    importBtn:{label:'Zulassungsschein importieren (TES)',
+      fills:{volumen:'1000 L', werkstoffInnenbehaelter:'HDPE', eigengewicht:'58 kg', maxBruttogewicht:'1500 kg', pruefnorm:'ISO 16106'}},
+    importedFields:[
+      {key:'volumen', label:'Nennvolumen', placeholder:'z. B. 1000 l'},
+      {key:'werkstoffInnenbehaelter', label:'Werkstoff Innenbehälter', type:'select', options:['HDPE', 'LDPE']},
+      {key:'eigengewicht', label:'Eigengewicht'},
+      {key:'maxBruttogewicht', label:'Max. Bruttogewicht'},
+      {key:'pruefnorm', label:'Prüfnorm'},
+    ],
+    fields:[
+      {key:'handbuchLink', label:'Benutzerhandbuch (Link, PDF)', type:'text', placeholder:'z. B. www.handbuch.de'},
+      {key:'ersatzteileLink', label:'Ersatzteile (Link)', type:'text', placeholder:'z. B. www.ersatzteile.de'},
+      {key:'kontakt', label:'Kontakt bei Problemen', type:'text'},
+    ]
+  },
+  {
+    num:'03', id:'material', title:'Materialzusammensetzung', type:'single',
+    access:{H:'I',BF:'R',S:'-',IS:'-',C:'R',REP:'R',REC:'R',BAM:'R',E:'R'},
+    fields:[
+      {key:'materialSpezifikation', label:'Materialspezifikation (Interne ID)', type:'text'},
+      {key:'materialEC', label:'Material-ID (ECHA)', type:'text', placeholder:'z. B. 919-651-5'},
+      {key:'echaLink', label:'ECHA CHEM Link', type:'computed-link', sourceKey:'materialEC',
+        urlTemplate:(val)=> 'https://chem.echa.europa.eu/substance-search?searchText='+encodeURIComponent(val)},
+      {key:'rezyklatAnteil', label:'Rezyklatanteil (%)', type:'number'},
+      {key:'reachPfas', label:'REACH / PFAS-Angaben', type:'textarea'},
+    ]
+  },
+  {
+    num:'04', id:'konformitaet', title:'Konformität & Zertifizierung', type:'single',
+    access:{H:'R',BF:'-',S:'-',IS:'R',C:'-',REP:'-',REC:'R',BAM:'I',E:'R'},
+    note:'Felder werden direkt aus dem Zulassungsschein importiert und von der BAM verifiziert.',
+    importBtn:{label:'Zulassungsschein importieren (TES)',
+      fills:{zertifikatNummer:'UN 31H1/Y/12345', adrKonform:'Ja', pruefnorm:'ISO 16106', gueltigkeit:'2029-04-30'}},
+    importedFields:[
+      {key:'zertifikatNummer', label:'UN-Zertifikatsnummer'},
+      {key:'adrKonform', label:'ADR/RID-Konformität'},
+      {key:'pruefnorm', label:'Prüfnorm'},
+      {key:'gueltigkeit', label:'Gültig bis'},
+    ]
+  },
+  {
+    num:'05', id:'befuellhistorie', title:'Nutzungs-/Befüllhistorie', type:'list', entryLabel:'Befüllung',
+    access:{H:'-',BF:'I',S:'R',IS:'-',C:'R',REP:'-',REC:'-',BAM:'R',E:'-'},
+    importBtn:{label:'GHS-Klassifizierung importieren (ECHA C&L)',
+      note:'Ruft Piktogramme, Gefahrenklasse(n) und H-Sätze über die ECHA Classification & Labelling Inventory anhand der Füllgut-ID ab (Demo mit Salpetersäure-Daten).',
+      fills:{ghsPiktogramme:'GHS03, GHS05, GHS06', gefahrenklasse:'Ox. Liq. 3; Skin Corr. 1A; Acute Tox. 3', hSaetze:'H272, H314, H331'}},
+    fields:[
+      {key:'fuellgut', label:'Füllgut', type:'text'},
+      {key:'fuellgutID', label:'Füllgut-ID (ECHA)', type:'text'},
+      {key:'echaLink', label:'ECHA CHEM Link', type:'computed-link', sourceKey:'fuellgutID',
+        urlTemplate:(val)=> 'https://chem.echa.europa.eu/substance-search?searchText='+encodeURIComponent(val)},
+      {key:'ghsPiktogramme', label:'GHS-Piktogramme', type:'text', placeholder:'z. B. GHS03, GHS05, GHS06'},
+      {key:'gefahrenklasse', label:'Gefahrenklasse(n)', type:'text'},
+      {key:'hSaetze', label:'H-Sätze', type:'text'},
+      {key:'fuellgutherstellerID', label:'Füllguthersteller-ID', type:'text'},
+      {key:'chargennummer', label:'Chargennummer', type:'text'},
+      {key:'fuellmenge', label:'Füllmenge (L/kg)', type:'number'},
+      {key:'datum', label:'Datum Befüllung', type:'date'},
+      {key:'sdb', label:'Sicherheitsdatenblatt (Link)', type:'text', placeholder:'https://www.sicherheitsblatt.de'},
+      {key:'gefahrgut', label:'Gefahrgut?', type:'select', options:['Nein','Ja']},
+      {key:'gefahrgutklasse', label:'Gefahrgutklasse', type:'text'},
+      {key:'ex', label:'Explosiv (EX)?', type:'select', options:['Nein','Ja']},
+    ]
+  },
+  {
+    num:'06', id:'wartung', title:'Wartung & Inspektion', type:'list', entryLabel:'Prüfung', timeline:true,
+    access:{H:'R',BF:'R',S:'-',IS:'I',C:'-',REP:'R',REC:'-',BAM:'R',E:'-'},
+    fields:[
+      {key:'datum', label:'Prüfdatum', type:'date'},
+      {key:'art', label:'Prüfart', type:'select', options:['2,5-Jahres-Prüfung','5-Jahres-Prüfung','Dichtheitsprüfung']},
+      {key:'ergebnis', label:'Prüfergebnis', type:'select', options:['bestanden','nicht bestanden']},
+    ]
+  },
+  {
+    num:'07', id:'reinigung', title:'Reinigung & Aufbereitung', type:'list', entryLabel:'Reinigung',
+    access:{H:'-',BF:'R',S:'-',IS:'-',C:'I',REP:'R',REC:'R',BAM:'R',E:'-'},
+    fields:[
+      {key:'datum', label:'Reinigungsdatum', type:'date'},
+      {key:'reinigerID', label:'Reiniger-ID', type:'text'},
+      {key:'verfahren', label:'Reinigungsverfahren', type:'select', options:['Dampfreinigung','Nassreinigung','Chemische Reinigung']},
+      {key:'zertifikat', label:'Reinigungszertifikat (Datei)', type:'file'},
+    ]
+  },
+  {
+    num:'08', id:'reparatur', title:'Reparaturhistorie', type:'list', entryLabel:'Reparatur',
+    access:{H:'R',BF:'R',S:'-',IS:'R',C:'-',REP:'I',REC:'R',BAM:'R',E:'-'},
+    fields:[
+      {key:'datum', label:'Reparaturdatum', type:'date'},
+      {key:'schadensart', label:'Schadensart', type:'select', options:['Riss','Ventilschaden','Gestellschaden','Sonstiges']},
+      {key:'teile', label:'Ausgetauschte Teile', type:'text'},
+      {key:'zustand', label:'Zustand nach Reparatur', type:'select', options:['einsatzbereit','eingeschränkt einsatzbereit','ausgemustert']},
+    ]
+  },
+  {
+    num:'09', id:'logistik', title:'Logistik & Sensordaten (IoT)', type:'single', simulateBtn:true,
+    access:{H:'R',BF:'R',S:'I',IS:'-',C:'-',REP:'-',REC:'-',BAM:'R',E:'-'},
+    fields:[
+      {key:'standort', label:'Standort (GPS)', type:'text'},
+      {key:'temperatur', label:'Temperatur (°C)', type:'number'},
+      {key:'feuchtigkeit', label:'Rel. Luftfeuchtigkeit (%)', type:'number'},
+      {key:'uv', label:'UV-Einwirkung (Index)', type:'number'},
+      {key:'erschuetterung', label:'Erschütterung erkannt', type:'select', options:['Nein','Ja']},
+      {key:'fuellstand', label:'Füllstand (%)', type:'number'},
+    ]
+  },
+  {
+    num:'10', id:'lebensende', title:'Lebensende & Recycling', type:'single',
+    access:{H:'-',BF:'R',S:'-',IS:'-',C:'-',REP:'-',REC:'I',BAM:'R',E:'R'},
+    fields:[
+      {key:'ausmusterungsdatum', label:'Ausmusterungsdatum', type:'date'},
+      {key:'recyclingverfahren', label:'Recyclingverfahren', type:'text'},
+      {key:'verwertungsquote', label:'Verwertungsquote (%)', type:'number'},
+      {key:'entsorgungsbetrieb', label:'Entsorgungsbetrieb', type:'text'},
+    ]
+  },
+];
+
+// ---- central state (in-memory only) ----
+function uuidv4(){
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c=>{
+    const r = Math.random()*16|0, v = c==='x'?r:(r&0x3|0x8);
+    return v.toString(16);
+  });
+}
+let dpp = {};
+SUBMODELS.forEach(sm=>{ dpp[sm.id] = sm.type==='list' ? [] : {}; });
+dpp.produktidentifikation.seriennummer = uuidv4();
+
+let currentRole = 'H';
+
+// ---- rendering ----
+const roleSelect = document.getElementById('roleSelect');
+const roleDesc = document.getElementById('roleDesc');
+const navList = document.getElementById('navList');
+const main = document.getElementById('main');
+
+STAKEHOLDERS.forEach(s=>{
+  const opt = document.createElement('option');
+  opt.value = s.id; opt.textContent = s.name;
+  roleSelect.appendChild(opt);
+});
+roleSelect.value = currentRole;
+roleSelect.addEventListener('change', ()=>{ currentRole = roleSelect.value; render(); });
+
+function fieldInput(field, value, onChange, readonly){
+  const wrap = document.createElement('div');
+  wrap.className = 'field' + (field.type==='textarea'?' full':'');
+  const label = document.createElement('label');
+  label.textContent = field.label;
+  wrap.appendChild(label);
+
+  if(readonly){
+    const div = document.createElement('div');
+    div.className = 'readval' + (!value ? ' empty':'');
+    div.textContent = value || 'Noch keine Daten';
+    wrap.appendChild(div);
+    return wrap;
+  }
+
+  let el;
+  if(field.type==='select'){
+    el = document.createElement('select');
+    const blank = document.createElement('option'); blank.value=''; blank.textContent='– auswählen –';
+    el.appendChild(blank);
+    field.options.forEach(o=>{
+      const op = document.createElement('option'); op.value=o; op.textContent=o;
+      if(value===o) op.selected = true;
+      el.appendChild(op);
+    });
+  } else if(field.type==='textarea'){
+    el = document.createElement('textarea');
+    el.value = value || '';
+  } else if(field.type==='uuid'){
+    el = document.createElement('input'); el.type='text'; el.value = value || ''; el.readOnly = true;
+    el.style.fontFamily = 'var(--mono)'; el.style.color = 'var(--muted)';
+  } else if(field.type==='file'){
+    el = document.createElement('input'); el.type='file';
+    el.addEventListener('change', ()=> onChange(el.files[0] ? el.files[0].name : ''));
+    wrap.appendChild(el);
+    return wrap;
+  } else {
+    el = document.createElement('input');
+    el.type = field.type==='number' ? 'number' : (field.type==='date' ? 'date' : 'text');
+    el.value = value || '';
+    if(field.placeholder) el.placeholder = field.placeholder;
+  }
+  el.addEventListener('input', ()=> onChange(el.value));
+  el.addEventListener('change', ()=> onChange(el.value));
+  wrap.appendChild(el);
+  return wrap;
+}
+
+function renderImportedRow(sm){
+  const row = document.createElement('div');
+  row.className = 'field-grid';
+  sm.importedFields.forEach(f=>{
+    const val = dpp[sm.id][f.key];
+    const box = fieldInput({label:f.label, type:'text'}, val, ()=>{}, true);
+    if(val){
+      const tag = document.createElement('span');
+      tag.className = 'imported-tag'; tag.textContent = 'AUTO · TES';
+      box.querySelector('label').appendChild(tag);
+    }
+    row.appendChild(box);
+  });
+  return row;
+}
+
+function renderSingleCard(sm, access){
+  const body = document.createElement('div');
+  body.className = 'card-body';
+
+  if(sm.note){
+    const n = document.createElement('div'); n.className='note'; n.textContent = sm.note;
+    body.appendChild(n);
+  }
+
+  if(sm.importBtn && access==='I'){
+    const row = document.createElement('div'); row.className='import-row';
+    const btn = document.createElement('button');
+    btn.textContent = '⇩ ' + sm.importBtn.label;
+    btn.addEventListener('click', ()=>{
+      Object.assign(dpp[sm.id], sm.importBtn.fills);
+      render();
+    });
+    row.appendChild(btn);
+    if(sm.importBtn.note){
+      const small = document.createElement('span');
+      small.style.fontSize='12px'; small.style.color='var(--muted)';
+      small.textContent = sm.importBtn.note;
+      row.appendChild(small);
+    }
+    body.appendChild(row);
+  }
+
+  if(sm.importedFields){
+    body.appendChild(renderImportedRow(sm));
+    const spacer = document.createElement('div'); spacer.style.height='14px';
+    body.appendChild(spacer);
+  }
+
+  if(sm.simulateBtn && access==='I'){
+    const row = document.createElement('div'); row.className='import-row';
+    const btn = document.createElement('button');
+    btn.textContent = '⟳ Sensordaten simulieren';
+    btn.addEventListener('click', ()=>{
+      Object.assign(dpp[sm.id], {
+        standort: (49+Math.random()).toFixed(4)+'° N, '+(9+Math.random()).toFixed(4)+'° E',
+        temperatur: (15+Math.random()*10).toFixed(1),
+        feuchtigkeit: (30+Math.random()*40).toFixed(0),
+        uv: (Math.random()*10).toFixed(1),
+        erschuetterung: Math.random()>0.8 ? 'Ja':'Nein',
+        fuellstand: (Math.random()*100).toFixed(0),
+      });
+      render();
+    });
+    row.appendChild(btn);
+    body.appendChild(row);
+  }
+
+  const grid = document.createElement('div'); grid.className='field-grid';
+  sm.fields.forEach(f=>{
+    const readonlyField = access!=='I' || f.type==='uuid';
+    grid.appendChild(fieldInput(f, dpp[sm.id][f.key], (val)=>{ dpp[sm.id][f.key]=val; }, readonlyField && access!=='I' ? true : (f.type==='uuid')));
+  });
+  body.appendChild(grid);
+  return body;
+}
+
+function renderListCard(sm, access){
+  const body = document.createElement('div');
+  body.className = 'card-body';
+  const entries = dpp[sm.id];
+
+  if(sm.timeline){
+    const info = document.createElement('div'); info.className='timeline-info';
+    const last = entries[entries.length-1];
+    let next = 'noch keine Prüfung erfasst';
+    if(last && last.datum){
+      const d = new Date(last.datum);
+      const years = last.art && last.art.includes('5-Jahres') ? 5 : 2.5;
+      d.setMonth(d.getMonth() + years*12);
+      next = d.toISOString().slice(0,10);
+    }
+    info.innerHTML = '<span>Herstellung → 2,5-J. → 5-J. Zyklus</span><span>Nächste Prüfung fällig: <b>'+next+'</b></span><span>Zuständig: <b>Inspektionsstelle</b></span>';
+    body.appendChild(info);
+  }
+
+  if(entries.length===0){
+    const e = document.createElement('div'); e.className='empty-state';
+    e.textContent = 'Noch keine Einträge vorhanden.';
+    body.appendChild(e);
+  } else {
+    const table = document.createElement('table');
+    const thead = document.createElement('thead');
+    const trh = document.createElement('tr');
+    sm.fields.forEach(f=>{ const th=document.createElement('th'); th.textContent=f.label; trh.appendChild(th); });
+    thead.appendChild(trh); table.appendChild(thead);
+    const tbody = document.createElement('tbody');
+    entries.forEach(entry=>{
+      const tr = document.createElement('tr');
+      sm.fields.forEach(f=>{ const td=document.createElement('td'); td.textContent = entry[f.key] || '–'; tr.appendChild(td); });
+      tbody.appendChild(tr);
+    });
+    table.appendChild(tbody);
+    body.appendChild(table);
+  }
+
+  if(access==='I'){
+    const formWrap = document.createElement('div');
+    formWrap.style.marginTop = '16px';
+    formWrap.style.borderTop = '1px solid var(--border)';
+    formWrap.style.paddingTop = '14px';
+    const label = document.createElement('div');
+    label.className='note'; label.style.marginBottom='10px';
+    label.textContent = 'Neuen Eintrag erfassen: ' + sm.entryLabel;
+    formWrap.appendChild(label);
+
+    const draft = {};
+    const grid = document.createElement('div'); grid.className='field-grid';
+    sm.fields.forEach(f=>{
+      grid.appendChild(fieldInput(f, draft[f.key], (val)=>{ draft[f.key]=val; }, false));
+    });
+    formWrap.appendChild(grid);
+
+    const addBtn = document.createElement('button');
+    addBtn.className = 'primary add-entry-btn';
+    addBtn.textContent = '+ Eintrag hinzufügen';
+    addBtn.addEventListener('click', ()=>{
+      entries.push({...draft});
+      render();
+    });
+    formWrap.appendChild(addBtn);
+    body.appendChild(formWrap);
+  }
+  return body;
+}
+
+function renderMatrix(){
+  main.innerHTML = '';
+  const card = document.createElement('div'); card.className='card';
+  const head = document.createElement('div'); head.className='card-head';
+  head.innerHTML = '<span class="num">MATRIX</span><h2>Zugriffsmatrix</h2>';
+  const back = document.createElement('button');
+  back.textContent = '← zurück'; back.style.marginLeft='auto';
+  back.addEventListener('click', render);
+  head.appendChild(back);
+  card.appendChild(head);
+
+  const body = document.createElement('div'); body.className='card-body matrix-wrap';
+  const table = document.createElement('table');
+  const thead = document.createElement('thead');
+  const trh = document.createElement('tr');
+  trh.appendChild(document.createElement('th'));
+  STAKEHOLDERS.forEach(s=>{ const th=document.createElement('th'); th.textContent=s.id; th.title=s.name; trh.appendChild(th); });
+  thead.appendChild(trh); table.appendChild(thead);
+
+  const tbody = document.createElement('tbody');
+  SUBMODELS.forEach(sm=>{
+    const tr = document.createElement('tr');
+    const tdName = document.createElement('td'); tdName.textContent = sm.num+' '+sm.title;
+    tr.appendChild(tdName);
+    STAKEHOLDERS.forEach(s=>{
+      const td = document.createElement('td');
+      const v = sm.access[s.id];
+      td.textContent = v==='I' ? 'I' : (v==='R' ? 'R' : '–');
+      td.className = v==='I' ? 'cell-I' : (v==='R' ? 'cell-R' : 'cell-dash');
+      tr.appendChild(td);
+    });
+    tbody.appendChild(tr);
+  });
+  table.appendChild(tbody);
+  body.appendChild(table);
+
+  const legend = document.createElement('div');
+  legend.style.marginTop='14px'; legend.style.fontSize='12px'; legend.style.color='var(--muted)';
+  legend.textContent = 'I = Eingabe · R = Lesen · – = kein Zugriff (Submodel wird für diese Rolle nicht angezeigt)';
+  body.appendChild(legend);
+
+  card.appendChild(body);
+  main.appendChild(card);
+}
+
+function render(){
+  const role = STAKEHOLDERS.find(s=>s.id===currentRole);
+  roleDesc.textContent = role.desc;
+
+  navList.innerHTML = '';
+  main.innerHTML = '';
+
+  SUBMODELS.forEach(sm=>{
+    const access = sm.access[currentRole];
+    if(access==='-') return;
+
+    const navA = document.createElement('a');
+    navA.href = '#sm-'+sm.id;
+    navA.innerHTML = '<span class="n">'+sm.num+'</span><span>'+sm.title+'</span><span class="tag tag-'+access+'">'+(access==='I'?'Eingabe':'Lesen')+'</span>';
+    navList.appendChild(navA);
+
+    const card = document.createElement('div');
+    card.className = 'card'; card.id = 'sm-'+sm.id;
+    const head = document.createElement('div'); head.className='card-head';
+    head.innerHTML = '<span class="num">'+sm.num+'</span><h2>'+sm.title+'</h2><span class="access-badge '+access+'">'+(access==='I'?'EINGABE':'LESEN')+'</span>';
+    card.appendChild(head);
+    card.appendChild(sm.type==='list' ? renderListCard(sm, access) : renderSingleCard(sm, access));
+    main.appendChild(card);
+  });
+
+  if(main.children.length===0){
+    main.innerHTML = '<div class="empty-state">Für diese Rolle sind keine Submodels sichtbar.</div>';
+  }
+}
+
+document.getElementById('showMatrixBtn').addEventListener('click', renderMatrix);
+
+document.getElementById('downloadBtn').addEventListener('click', ()=>{
+  const blob = new Blob([JSON.stringify(dpp, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'dpp-smartibc-' + (dpp.produktidentifikation.seriennummer || 'export') + '.json';
+  a.click();
+  URL.revokeObjectURL(url);
+});
+
+document.getElementById('loadBtn').addEventListener('click', ()=> document.getElementById('fileInput').click());
+document.getElementById('fileInput').addEventListener('change', (e)=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev)=>{
+    try{
+      const loaded = JSON.parse(ev.target.result);
+      dpp = loaded;
+      SUBMODELS.forEach(sm=>{ if(!dpp[sm.id]) dpp[sm.id] = sm.type==='list' ? [] : {}; });
+      render();
+    }catch(err){
+      alert('Datei konnte nicht gelesen werden: ' + err.message);
+    }
+  };
+  reader.readAsText(file);
+});
+
+render();
+</script>
+</body>
+</html>
